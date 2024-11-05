@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Galon 3D dengan Rotasi</title>
+  <style>
+    body { margin: 0; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <h1 style="margin-left: 10px ;">Delai Resgista Setyawan | 5025221221</h1>
+  <!-- Tambahkan Three.js dan OrbitControls CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/OBJLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/loaders/MTLLoader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
+
+  <script>
+    // Inisialisasi scene, kamera, dan renderer
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Tambahkan pencahayaan
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    directionalLight.position.set(1, 1, 1).normalize();
+    scene.add(directionalLight);
+
+    // Muat file MTL dan OBJ
+const mtlLoader = new THREE.MTLLoader();
+mtlLoader.load('galon.mtl', (materials) => {
+  materials.preload();
+  const objLoader = new THREE.OBJLoader();
+  objLoader.setMaterials(materials);
+  objLoader.load('galon.obj', (object) => {
+    object.traverse((child) => {
+      if (child.isMesh) {
+        child.material.transparent = false; // Nonaktifkan transparansi
+        child.material.opacity = 1; // Set opacity ke 1 untuk memastikan sepenuhnya opak
+        child.material.alphaTest = 0.5; // Hapus piksel transparan yang tidak diinginkan
+        child.material.side = THREE.DoubleSide; // Render kedua sisi objek
+        child.material.needsUpdate = true; // Update material setelah perubahan
+      }
+    });
+    scene.add(object);
+    object.position.y = -1;
+  });
+});
+
+
+    
+
+
+    // Posisi kamera
+    camera.position.z = 3;
+
+    // Tambahkan OrbitControls
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true; // Untuk gerakan yang lebih halus
+    controls.dampingFactor = 0.05;
+
+    // Animasi
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update(); // Update kontrol setiap frame
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Resize handler
+    window.addEventListener('resize', () => {
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+    });
+  </script>
+</body>
+</html>
